@@ -47,7 +47,7 @@ class TimeoutTimer : public QTimer
     Q_OBJECT
 
 public:
-    TimeoutTimer(QObject* parent = nullptr);
+    TimeoutTimer(QObject* parent = 0);
     QNetworkReply* reply;
     QVariantMap data;
 };
@@ -57,7 +57,7 @@ class JsNetworkRequest : public QObject
     Q_OBJECT
 
 public:
-    JsNetworkRequest(QNetworkRequest* request, QObject* parent = nullptr);
+    JsNetworkRequest(QNetworkRequest* request, QObject* parent = 0);
     Q_INVOKABLE void abort();
     Q_INVOKABLE void changeUrl(const QString& url);
     Q_INVOKABLE bool setHeader(const QString& name, const QVariant& value);
@@ -73,9 +73,9 @@ class NoFileAccessReply : public QNetworkReply
 public:
     NoFileAccessReply(QObject* parent, const QNetworkRequest& req, const QNetworkAccessManager::Operation op);
     ~NoFileAccessReply();
-    void abort() Q_DECL_OVERRIDE {}
+    void abort() {}
 protected:
-    qint64 readData(char*, qint64) Q_DECL_OVERRIDE { return -1; }
+    qint64 readData(char*, qint64) { return -1; }
 };
 
 class NetworkAccessManager : public QNetworkAccessManager
@@ -89,6 +89,8 @@ public:
     void setResourceTimeout(int resourceTimeout);
     void setCustomHeaders(const QVariantMap& headers);
     QVariantMap customHeaders() const;
+    QStringList captureContent() const;
+    void setCaptureContent(const QStringList& patterns);
 
     void setCookieJar(QNetworkCookieJar* cookieJar);
 
@@ -100,30 +102,22 @@ protected:
     int m_resourceTimeout;
     QString m_userName;
     QString m_password;
-    QNetworkReply* createRequest(Operation op, const QNetworkRequest& req, QIODevice* outgoingData) Q_DECL_OVERRIDE;
+    QNetworkReply* createRequest(Operation op, const QNetworkRequest& req, QIODevice* outgoingData = 0);
     void handleFinished(QNetworkReply* reply, const QVariant& status, const QVariant& statusText);
 
-Q_SIGNALS:
+signals:
     void resourceRequested(const QVariant& data, QObject*);
     void resourceReceived(const QVariant& data);
     void resourceError(const QVariant& data);
     void resourceTimeout(const QVariant& data);
-
-#if QT_VERSION >= QT_VERSION_CHECK(5, 6, 0)
-    void resourceRedirect(const QVariant& data);
-#endif
 
 private slots:
     void handleStarted();
     void handleFinished(QNetworkReply* reply);
     void provideAuthentication(QNetworkReply* reply, QAuthenticator* authenticator);
     void handleSslErrors(const QList<QSslError>& errors);
-    void handleNetworkError(QNetworkReply::NetworkError);
+    void handleNetworkError();
     void handleTimeout();
-
-#if QT_VERSION >= QT_VERSION_CHECK(5, 6, 0)
-    void handleRedirect(const QUrl& url);
-#endif
 
 private:
     void prepareSslConfiguration(const Config* config);
