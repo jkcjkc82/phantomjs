@@ -408,8 +408,6 @@ void NetworkAccessManager::handleFinished(QNetworkReply *reply)
     QVariant status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
     QVariant statusText = reply->attribute(QNetworkRequest::HttpReasonPhraseAttribute);
 
-    QByteArray tdd = reply->peek(reply->size());
-
     this->handleFinished(reply, status, statusText);
 }
 
